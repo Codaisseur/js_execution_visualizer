@@ -1,26 +1,104 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useRef, useMemo, useState } from "react";
+import createPersistedState from "use-persisted-state";
+import { Controlled as CodeMirror } from "react-codemirror2";
+import "codemirror/mode/jsx/jsx";
+import "codemirror/lib/codemirror.css";
+import "./assets/codemirror-theme.scss";
+import styles from "./App.module.scss";
 
-function App() {
+import Viz from "./Viz";
+import record from "./lib/record";
+
+const usePersistedCode = createPersistedState("code");
+
+const CM_OPTS = {
+  mode: "text/javascript",
+  theme: "jsviz",
+  lineNumbers: false,
+  smartIndent: true,
+  tabSize: 2,
+  indentWithTabs: false
+};
+
+export default function App() {
+  const inst = useRef({ editor: null, marker: null });
+  const [code, setCode] = usePersistedCode(`let x = 42;`);
+  const { error, history } = useMemo(() => {
+    try {
+      return { history: record(code) };
+    } catch (error) {
+      return { error };
+    }
+  }, [code]);
+
+  const [stepno, setStepno] = useState(30);
+  const [maxDetail, setMaxDetail] = useState(2);
+
+  const visibleHistory = history
+    ? history.filter(({ detail }) => detail <= maxDetail)
+    : [];
+  // step = { context, node, pre, summary, detail }
+  const step = history
+    ? visibleHistory[Math.min(stepno, visibleHistory.length - 1)]
+    : null;
+
+  useEffect(() => {
+    if (!inst.current.editor) return;
+    inst.current.marker && inst.current.marker.clear();
+
+    if (!step) return;
+    const doc = inst.current.editor.getDoc();
+    const loc = step.node.loc;
+    inst.current.marker = doc.markText(
+      { line: loc.start.line - 1, ch: loc.start.column },
+      { line: loc.end.line - 1, ch: loc.end.column },
+      {
+        className: step.pre ? styles.markedPre : styles.markedPost
+      }
+    );
+  }, [inst, step]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <CodeMirror
+        className="editable"
+        options={CM_OPTS}
+        editorDidMount={editor => (inst.current.editor = editor)}
+        value={code}
+        onBeforeChange={(editor, data, value) => {
+          setCode(value);
+        }}
+      />
+      {error && <p>{error.message}</p>}
+      {history && (
+        <div>
+          <div>
+            <label>
+              Step{" "}
+              <input
+                style={{ width: "400px" }}
+                min={0}
+                max={visibleHistory.length - 1}
+                step={1}
+                value={stepno}
+                onChange={e => setStepno(e.target.value)}
+                type="range"
+              />
+            </label>
+          </div>
+          <div>
+            <label>
+              Expression detail?{" "}
+              <input
+                type="checkbox"
+                checked={maxDetail === 2}
+                onChange={() => setMaxDetail(3 - maxDetail)}
+              />
+            </label>
+          </div>
+          <Viz step={step} />
+        </div>
+      )}
     </div>
   );
 }
-
-export default App;

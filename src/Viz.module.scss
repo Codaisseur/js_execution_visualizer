@@ -1,0 +1,19 @@
+.scope {
+  padding: 0.4rem;
+  margin: 0.4rem 0.2rem 0.2rem 0.2rem;
+  border: 1px solid #ccc;
+
+  &.isCurrent {
+    border: 2px solid #333;
+    padding: calc(0.4rem - 1px);
+  }
+}
+
+.var {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+}
+.kind {
+  font-family: serif;
+  font-style: italic;
+}
