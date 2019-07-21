@@ -97,7 +97,12 @@ const s1 = definite("variable");
             fill="#c1272d"
           />
         </svg>
-        A proof a concept JS execution visualization tool for teaching purposes{" "}
+        A proof a concept JS execution visualization tool for teaching purposes
+        <em>
+          {" "}
+          - click the timeline, then use your arrow keys (UI needs improvement
+          :D)
+        </em>{" "}
         <a href="https://github.com/Codaisseur/js_execution_visualizer">
           [repo]
         </a>
