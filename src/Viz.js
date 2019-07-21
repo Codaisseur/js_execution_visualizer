@@ -1,11 +1,11 @@
 import React from "react";
 import cx from "classnames";
-import { Return } from "./lib/evaluate";
 import styles from "./Viz.module.scss";
 
 export default function({ step: { node, context, pre, summary, detail } }) {
   return (
     <div>
+      <p>{summary}</p>
       <Scope context={context} scopeRef={0} current={context.currentScope} />
     </div>
   );
@@ -15,9 +15,6 @@ function Scope({ context, scopeRef, current }) {
   const scope = context.scopes[scopeRef];
   const isCurrent = current === scopeRef;
   const vars = Object.values(scope.variables);
-  if (scope.variables[Return.symbol]) {
-    vars.push(scope.variables[Return.symbol]);
-  }
 
   return (
     <div

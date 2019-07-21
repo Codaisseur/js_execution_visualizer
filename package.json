@@ -5,6 +5,7 @@
   "dependencies": {
     "@babel/parser": "^7.5.5",
     "@babel/types": "^7.5.5",
+    "@codaisseur/theme": "^0.3.3",
     "classnames": "^2.2.6",
     "codemirror": "^5.48.2",
     "deepcopy": "^2.0.0",

@@ -1,6 +1,48 @@
-.markedPre {
-  background: #fff388;
+@import "./assets/config";
+
+$padding: 1rem;
+$preEval: #efede6;
+$postEval: #b6e4b8;
+
+.code {
+  background: #f5f5f5;
+
+  :global(.CodeMirror) {
+    padding: $padding;
+    pre {
+      padding: 0;
+    }
+  }
+
+  .markedPre,
+  .markedPost {
+    border: 0;
+    border-style: solid;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+  }
+  .markedPre {
+    background: $preEval;
+    border-color: $preEval;
+  }
+  .markedPost {
+    background: $postEval;
+    border-color: $postEval;
+  }
 }
-.markedPost {
-  background: #8fdcff;
+
+.emptyDivider {
+  margin: 0;
+  height: 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.main {
+  padding: $padding;
+
+  .error {
+    color: #c00;
+    font-weight: bold;
+  }
 }

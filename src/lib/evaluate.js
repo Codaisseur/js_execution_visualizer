@@ -33,8 +33,6 @@ export function makeInitialContext() {
 }
 
 export class Return {
-  static symbol = Symbol("[[Return]]");
-
   constructor(value) {
     this.value = value;
   }
@@ -123,10 +121,20 @@ evaluators.BlockStatement = function*(node, context, { skipScope }) {
 };
 
 evaluators.ReturnStatement = function*(node, context) {
-  yield { context, node, pre: true, summary: `return`, detail: 1 };
-  const ret = new Return(yield* evaluate(node.argument, context));
-  yield { context, node, summary: `return`, detail: 1 };
-  throw ret;
+  yield {
+    context,
+    node,
+    pre: true,
+    summary: `compute return value`,
+    detail: 1
+  };
+  const returnValue = yield* evaluate(node.argument, context);
+  context.scopes[context.currentScope].variables["[[return]]"] = {
+    kind: "return",
+    value: returnValue
+  };
+  yield { context, node, summary: `computed return value`, detail: 1 };
+  throw new Return(returnValue);
 };
 
 function* invokeFunction({ definingScope, params, body }, args, context) {
@@ -154,18 +162,15 @@ function* invokeFunction({ definingScope, params, body }, args, context) {
   }
 
   const executionContext = { ...context, currentScope: scope_ref };
-  let result;
   if (body.type === "BlockStatement") {
-    result = yield* Return.from(function*() {
+    return yield* Return.from(function*() {
       return yield* evaluate(body, executionContext, {
         skipScope: true
       });
     });
   } else {
-    result = yield* evaluate(body, executionContext);
+    return yield* evaluate(body, executionContext);
   }
-  executionScope.variables[Return.symbol] = { kind: "return", value: result };
-  return result;
 }
 
 evaluators.CallExpression = function*(node, context) {
@@ -222,7 +227,7 @@ evaluators.FunctionDeclaration = function*(node, context) {
   const object_ref = context.objects.push(fn) - 1;
   scope.variables[node.id.name] = {
     name: node.id.name,
-    kind: "function",
+    kind: "fundecl",
     value: { object_ref }
   };
   yield {

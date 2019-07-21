@@ -31,11 +31,10 @@
     height: auto;
 
     color: #666;
-    background: white;
-    padding: 0.4rem;
 
     font-family: "Menlo", "DejaVu Sans Mono", "Consolas", monospace;
-    font-size: 90%;
+    font-size: 0.9rem;
+    line-height: calc(1rem + 2px);
   }
 
   div.CodeMirror-selected {
@@ -64,7 +63,8 @@
   }
 
   .cm-keyword {
-    color: #6262ff;
+    color: #333;
+    font-weight: bold;
   }
   .cm-atom {
     color: #e91e63;
@@ -72,34 +72,29 @@
   .cm-number {
     color: #da3024;
   }
-  .cm-def {
-    color: #8da6ce;
-  }
-  span.cm-variable-3,
-  span.cm-def,
-  span.cm-type {
-    color: #07a;
-  }
-
-  .cm-variable {
+  .cm-variable,
+  .cm-variable-3,
+  .cm-def,
+  .cm-type {
     color: #07a;
   }
   .cm-property {
-    color: #905;
+    color: #666;
   }
   .cm-qualifier {
     color: #690;
   }
 
   .cm-operator {
-    color: #cda869;
+    color: #999;
   }
   .cm-comment {
-    color: #777;
+    color: #999;
     font-weight: normal;
+    font-style: italic;
   }
   .cm-string {
-    color: #07a;
+    color: #52a556;
   }
   .cm-string-2 {
     color: #bd6b18;

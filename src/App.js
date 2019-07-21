@@ -7,6 +7,7 @@ import "./assets/codemirror-theme.scss";
 import styles from "./App.module.scss";
 
 import Viz from "./Viz";
+import HistoryTimeline from "./HistoryTimeline";
 import record from "./lib/record";
 
 const usePersistedCode = createPersistedState("code");
@@ -31,16 +32,21 @@ export default function App() {
     }
   }, [code]);
 
-  const [stepno, setStepno] = useState(30);
-  const [maxDetail, setMaxDetail] = useState(2);
+  const [_stepno, setStepno] = useState(0);
+  const [maxDetail, setMaxDetail] = useState(1);
 
-  const visibleHistory = history
-    ? history.filter(({ detail }) => detail <= maxDetail)
-    : [];
+  const visibleHistory =
+    history && history.length > 0
+      ? history.filter(({ detail }) => detail <= maxDetail)
+      : null;
+
+  const stepno = Math.max(
+    0,
+    Math.min(_stepno, (visibleHistory || []).length - 1)
+  );
+
   // step = { context, node, pre, summary, detail }
-  const step = history
-    ? visibleHistory[Math.min(stepno, visibleHistory.length - 1)]
-    : null;
+  const step = visibleHistory ? visibleHistory[stepno] : null;
 
   useEffect(() => {
     if (!inst.current.editor) return;
@@ -59,44 +65,60 @@ export default function App() {
   }, [inst, step]);
 
   return (
-    <div className="App">
-      <CodeMirror
-        className="editable"
-        options={CM_OPTS}
-        editorDidMount={editor => (inst.current.editor = editor)}
-        value={code}
-        onBeforeChange={(editor, data, value) => {
-          setCode(value);
-        }}
-      />
-      {error && <p>{error.message}</p>}
-      {history && (
+    <div className="app">
+      <div className={styles.code}>
+        <CodeMirror
+          className="editable"
+          options={CM_OPTS}
+          editorDidMount={editor => (inst.current.editor = editor)}
+          value={code}
+          onBeforeChange={(editor, data, value) => {
+            setCode(value || "");
+          }}
+        />
+      </div>
+      {(error || !visibleHistory) && <hr className={styles.emptyDivider} />}
+      {error && (
+        <div className={styles.main}>
+          <div className={styles.error}>
+            <p>{error.message}</p>
+          </div>
+        </div>
+      )}
+      {visibleHistory && (
         <div>
-          <div>
-            <label>
-              Step{" "}
-              <input
-                style={{ width: "400px" }}
-                min={0}
-                max={visibleHistory.length - 1}
-                step={1}
-                value={stepno}
-                onChange={e => setStepno(e.target.value)}
-                type="range"
-              />
-            </label>
+          <HistoryTimeline
+            value={stepno}
+            onChange={setStepno}
+            history={visibleHistory}
+          />
+          <div className={styles.main}>
+            {/* <div>
+              <label>
+                Step{" "}
+                <input
+                  style={{ width: "400px" }}
+                  min={0}
+                  max={visibleHistory.length - 1}
+                  step={1}
+                  value={stepno}
+                  onChange={e => setStepno(e.target.value)}
+                  type="range"
+                />
+              </label>
+            </div> */}
+            <div>
+              <label>
+                Expression detail?{" "}
+                <input
+                  type="checkbox"
+                  checked={maxDetail === 2}
+                  onChange={() => setMaxDetail(3 - maxDetail)}
+                />
+              </label>
+            </div>
+            <Viz step={step} />
           </div>
-          <div>
-            <label>
-              Expression detail?{" "}
-              <input
-                type="checkbox"
-                checked={maxDetail === 2}
-                onChange={() => setMaxDetail(3 - maxDetail)}
-              />
-            </label>
-          </div>
-          <Viz step={step} />
         </div>
       )}
     </div>

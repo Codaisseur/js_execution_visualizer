@@ -1,0 +1,27 @@
+.timeline {
+  display: flex;
+  justify-content: stretch;
+  cursor: pointer;
+
+  .step {
+    flex: 1 1 2rem;
+    display: block;
+    height: 2rem;
+    max-width: 2rem;
+    background: #eee;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+
+    &:last-child {
+      border: none;
+    }
+
+    &.selected {
+      background: #52a556;
+    }
+
+    &:focus {
+      outline: 2px solid rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+  }
+}
