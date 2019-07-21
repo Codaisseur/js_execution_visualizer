@@ -19,8 +19,9 @@ export default function(code) {
     if (e instanceof RuntimeError) {
       // noop
       console.log("caught runtime error:", e);
+      return { history, runtimeError: e };
     } else throw e;
   }
 
-  return history;
+  return { history };
 }

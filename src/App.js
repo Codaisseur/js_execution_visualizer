@@ -11,6 +11,8 @@ import HistoryTimeline from "./HistoryTimeline";
 import record from "./lib/record";
 
 const usePersistedCode = createPersistedState("code");
+const usePersistedMaxDetail = createPersistedState("maxdetail");
+const usePersistedStepno = createPersistedState("stepno");
 
 const CM_OPTS = {
   mode: "text/javascript",
@@ -24,16 +26,16 @@ const CM_OPTS = {
 export default function App() {
   const inst = useRef({ editor: null, marker: null });
   const [code, setCode] = usePersistedCode(`let x = 42;`);
-  const { error, history } = useMemo(() => {
+  const { error, runtimeError, history } = useMemo(() => {
     try {
-      return { history: record(code) };
+      return record(code);
     } catch (error) {
       return { error };
     }
   }, [code]);
 
-  const [_stepno, setStepno] = useState(0);
-  const [maxDetail, setMaxDetail] = useState(2);
+  const [_stepno, setStepno] = usePersistedStepno(0);
+  const [maxDetail, setMaxDetail] = usePersistedMaxDetail(2);
 
   const visibleHistory =
     history && history.length > 0
@@ -81,7 +83,7 @@ export default function App() {
       {error && (
         <div className={styles.main}>
           <div className={styles.error}>
-            <p>{error.message}</p>
+            <p>Compile error: {error.message}</p>
           </div>
         </div>
       )}
@@ -91,6 +93,7 @@ export default function App() {
             value={stepno}
             onChange={setStepno}
             history={visibleHistory}
+            runtimeError={runtimeError}
           />
           <div className={styles.main}>
             {/* <div>
@@ -118,6 +121,11 @@ export default function App() {
               </label>
             </div>
             <Viz step={step} />
+            {runtimeError && (
+              <div className={styles.error}>
+                <p>Runtime error: {runtimeError.message}</p>
+              </div>
+            )}
           </div>
         </div>
       )}

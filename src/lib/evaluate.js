@@ -110,10 +110,10 @@ evaluators.CallExpression = function*(node, context) {
   // Second, lookup the function
   const fnValue = yield* evaluate(callee, context);
   if (!("object_ref" in fnValue))
-    throw new RuntimeError(`Cannot call non-function #1`);
+    throw new RuntimeError(`Cannot call non-function #1`, callee);
   const fn = context.objects[fnValue.object_ref];
   if (!fn || fn.type !== "function")
-    throw new RuntimeError(`Cannot call non-function #2`);
+    throw new RuntimeError(`Cannot call non-function #2`, callee);
 
   // First, evaluate arguments
   const args = [];
@@ -138,7 +138,7 @@ evaluators.FunctionDeclaration = function*(node, context) {
   if (node.async || node.generator)
     throw new NotSupported(`Async and generator functions are not supported`);
   if (!node.id || node.id.type !== "Identifier")
-    throw new RuntimeError(`should not happen`);
+    throw new RuntimeError(`should not happen`, node.id);
 
   yield {
     context,
@@ -200,6 +200,27 @@ evaluators.ObjectExpression = function*(node, context) {
   return { object_ref };
 };
 
+evaluators.ArrayExpression = function*(node, context) {
+  yield {
+    context,
+    node,
+    pre: true,
+    summary: `evaluate array expression`,
+    detail: 2
+  };
+  const arr = {
+    type: "array",
+    properties: {},
+    elements: []
+  };
+  const object_ref = context.objects.push(arr) - 1;
+  for (const el of node.elements) {
+    arr.elements.push(yield* evaluate(el, context));
+  }
+  yield { context, node, summary: `evaluated array expression`, detail: 2 };
+  return { object_ref };
+};
+
 evaluators.ArrowFunctionExpression = function*(node, context) {
   if (node.async || node.generator)
     throw new NotSupported(`Async and generator functions are not supported`);
@@ -249,7 +270,11 @@ evaluators.Identifier = function*(node, context) {
 };
 
 evaluators.MemberExpression = function*(node, context) {
-  const { site } = yield* locate(node, context);
+  const location = yield* locate(node, context);
+  if (!location) {
+    throw new RuntimeError(`member does not exist`, node);
+  }
+  const { site } = location;
   yield { context, node, summary: `evaluated property`, detail: 2 };
   return site.value;
 };
@@ -258,7 +283,7 @@ evaluators.AssignmentExpression = function*(node, context) {
   const { left, right } = node;
 
   // yield ({context,  node, pre: true, summary: `assign ${left.name}`, detail: 2 });
-  const { site } = yield* locate(left, context);
+  const { site } = yield* locate(left, context, { makeIfNonexistent: true });
   site.value = yield* evaluate(right, context);
   // yield ({context,  node, summary: `assigned ${left.name}`, detail: 2 });
 };

@@ -44,7 +44,8 @@ locators.Identifier = function*(node, context) {
   const defining_scope_ref = lookup(context, node.name, context.currentScope);
   if (defining_scope_ref === null)
     throw new RuntimeError(
-      `variable ${node.name} is not defined [lookup identifier]`
+      `variable ${node.name} is not defined [lookup identifier]`,
+      node
     );
 
   yield {
@@ -60,11 +61,18 @@ locators.Identifier = function*(node, context) {
   };
 };
 
-locators.MemberExpression = function*(node, context) {
+locators.MemberExpression = function*(
+  node,
+  context,
+  { makeIfNonexistent = false }
+) {
   const objectValue = yield* evaluate(node.object, context);
   if (typeof objectValue !== "object" || !("object_ref" in objectValue))
     // (actually, you can do things like `(2).toFixed(2)`)
-    throw new RuntimeError("cannot use memberexpression for non-object");
+    throw new RuntimeError(
+      "cannot use memberexpression for non-object",
+      node.object
+    );
 
   if (node.property.type !== "Identifier") throw new NotImplemented();
 
@@ -74,6 +82,29 @@ locators.MemberExpression = function*(node, context) {
     node.property.name,
     object_ref
   );
+  if (defining_object_ref === null) {
+    if (makeIfNonexistent) {
+      const site = (context.objects[object_ref].properties[
+        node.property.name
+      ] = {
+        name: node.property.name,
+        kind: "property"
+      });
+      yield {
+        context,
+        node,
+        summary: `made new property ${node.property.name}`,
+        detail: 2
+      };
+      return {
+        object_ref,
+        name: node.property.name,
+        site
+      };
+    } else {
+      return null;
+    }
+  }
 
   yield {
     context,

@@ -2,7 +2,12 @@ import React, { useCallback } from "react";
 import cx from "classnames";
 import styles from "./HistoryTimeline.module.scss";
 
-export default function HistoryTimeline({ history, value, onChange }) {
+export default function HistoryTimeline({
+  history,
+  value,
+  onChange,
+  runtimeError
+}) {
   const onKeyDown = useCallback(
     e => {
       if (e.keyCode === 37) {
@@ -33,6 +38,9 @@ export default function HistoryTimeline({ history, value, onChange }) {
           />
         );
       })}
+      {runtimeError && (
+        <div className={cx([styles.step, styles.runtimeError])} />
+      )}
     </div>
   );
 }

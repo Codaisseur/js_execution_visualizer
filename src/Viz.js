@@ -18,7 +18,6 @@ export default function({ step: { node, context, pre, summary, detail } }) {
         </div>
         <div className={styles.col}>
           {context.objects.map((obj, i) => {
-            console.log(obj);
             return (
               <div key={i}>
                 <div>object #{i}</div>
@@ -33,15 +32,30 @@ export default function({ step: { node, context, pre, summary, detail } }) {
 }
 
 function Obj({ obj }) {
-  const props = Object.values(obj.properties);
-
-  return (
-    <div className={styles.obj}>
-      {props.map((v, i) => (
-        <Var key={i} v={v} />
-      ))}
-    </div>
-  );
+  if (obj.type === "object") {
+    return (
+      <div className={styles.obj}>
+        {Object.values(obj.properties).map((v, i) => (
+          <Var key={i} v={v} />
+        ))}
+      </div>
+    );
+  } else if (obj.type === "array") {
+    return (
+      <div className={styles.obj}>
+        {Object.values(obj.elements).map((value, i) => (
+          <div key={i} className={styles.item}>
+            <span className={styles.kind}>item</span> <Value value={value} />
+          </div>
+        ))}
+        {Object.values(obj.properties).map((v, i) => (
+          <Var key={i} v={v} />
+        ))}
+      </div>
+    );
+  } else {
+    return null;
+  }
 }
 
 function Scope({ context, scopeRef, current }) {
