@@ -1,5 +1,6 @@
 {
   "name": "visualizing_js_execution",
+  "homepage": "https://codaisseur.github.io/js_execution_visualizer/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,6 +10,7 @@
     "classnames": "^2.2.6",
     "codemirror": "^5.48.2",
     "deepcopy": "^2.0.0",
+    "gh-pages": "^2.0.1",
     "node-sass": "^4.12.0",
     "react": "^16.8.6",
     "react-codemirror2": "^6.0.0",
@@ -17,6 +19,8 @@
     "use-persisted-state": "^0.3.0"
   },
   "scripts": {
+    "predeploy": "yarn run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -4,6 +4,22 @@ $padding: 1rem;
 $preEval: #efede6;
 $postEval: #b6e4b8;
 
+.header {
+  padding: $padding;
+  border-bottom: 1px solid #ccc;
+
+  .logo {
+    height: 2rem;
+    width: 2rem;
+    vertical-align: text-bottom;
+    margin: -0.4rem 0.7rem -0.4rem 0;
+  }
+}
+
+a {
+  color: $blue;
+}
+
 .code {
   background: #f5f5f5;
 
