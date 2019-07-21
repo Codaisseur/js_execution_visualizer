@@ -1,61 +1,7 @@
-export class NotImplemented extends Error {}
-export class NotSupported extends Error {}
-export class RuntimeError extends Error {}
-
-function lookup(context, name, ref) {
-  const scope = context.scopes[ref];
-  if (scope.variables[name]) {
-    return ref;
-  } else if (scope.parent !== undefined) {
-    return lookup(context, name, scope.parent);
-  } else {
-    return null;
-  }
-}
-
-function lookupProperty(context, name, object_ref) {
-  const object = context.object[object_ref];
-  if (object.properties[name]) {
-    return object_ref;
-  } else if (object.prototype !== undefined) {
-    return lookupProperty(context, name, object.prototype);
-  } else {
-    return null;
-  }
-}
-
-export function makeInitialContext() {
-  return {
-    scopes: [{ variables: {}, children: [] }],
-    objects: [],
-    currentScope: 0
-  };
-}
-
-export class Return {
-  constructor(value) {
-    this.value = value;
-  }
-}
-
-// Returning from a block of code is somewhat
-//  uncompositional. The simplest way to deal
-//  with it, instead of expanding the semantics,
-//  is leveraging the fact that the interpreter
-//  language, i.e. JS, already has this kind of
-//  non-local flow feature in the form of throwing
-//  :D
-Return.from = function*(mkgen) {
-  try {
-    return yield* mkgen();
-  } catch (e) {
-    if (e instanceof Return) {
-      return e.value;
-    } else {
-      throw e;
-    }
-  }
-};
+import { NotImplemented, NotSupported, RuntimeError } from "./errors";
+import { makeInitialContext } from "./context";
+import { Return } from "./return";
+import { locate } from "./locate";
 
 export const evaluators = {};
 
@@ -75,22 +21,6 @@ export function* evaluate(
     );
   }
   return yield* evaluator(node, context, namedArgs);
-}
-
-export const locators = {};
-
-export function* locate(node, context, namedArgs = {}) {
-  const locator = locators[node.type];
-  if (!locator) {
-    console.error(
-      `Couldn't find locator for AST node of type: ${node.type}`,
-      node
-    );
-    throw new NotImplemented(
-      `Couldn't find locator for AST node of type: ${node.type}`
-    );
-  }
-  return yield* locator(node, context, namedArgs);
 }
 
 function applyOperator(op, a, b) {
@@ -307,61 +237,22 @@ evaluators.BinaryExpression = function*(node, context) {
   return applyOperator(node.operator, leftValue, rightValue);
 };
 
-locators.Identifier = function*(node, context) {
-  const defining_scope_ref = lookup(context, node.name, context.currentScope);
-  if (defining_scope_ref === null)
-    throw new RuntimeError(
-      `variable ${node.name} is not defined [lookup identifier]`
-    );
-
-  yield { context, node, summary: `looked up ${node.name}`, detail: 2 };
-  return {
-    scope_ref: defining_scope_ref,
-    name: node.name,
-    site: context.scopes[defining_scope_ref].variables[node.name]
-  };
-};
-
-// (b) evaluate identifier as value (more common)
 evaluators.Identifier = function*(node, context) {
   if (node.name === "undefined") {
     yield (context, { node, summary: `evaluated undefined`, detail: 2 });
     return undefined;
-  } else {
-    const defining_scope_ref = lookup(context, node.name, context.currentScope);
-    if (defining_scope_ref === null) {
-      throw new RuntimeError(
-        `variable ${node.name} is not defined [eval identifier]`
-      );
-    }
-
-    yield { context, node, summary: `looked up ${node.name}`, detail: 2 };
-    return context.scopes[defining_scope_ref].variables[node.name].value;
   }
+
+  const { site } = yield* locate(node, context);
+  yield { context, node, summary: `evaluated variable`, detail: 2 };
+  return site.value;
 };
 
-// evaluators.MemberExpression = function* (node, context, { log }) {
-//   const { computed, object, property } = node;
-//   const obj = yield* evaluate(object, context, { log });
-
-//   let propertyName;
-//   if (computed) {
-//     propertyName = yield* evaluate();
-//   } else {
-//     if (property.type !== "Identifier") throw new Error("should not happen");
-//     propertyName = property.name;
-//   }
-//   const defining_object_ref = lookupProperty(context, propertyName);
-//   if (defining_object_ref === null)
-//     throw new RuntimeError(`property ${node.name} not found`);
-
-//   yield (context, { node, summary: `looked up property ${propertyName}`, detail: 2 });
-//   return {
-//     object_ref: defining_object_ref,
-//     name: propertyName,
-//     site: context.objects[defining_object_ref].properties[propertyName]
-//   };
-// };
+evaluators.MemberExpression = function*(node, context) {
+  const { site } = yield* locate(node, context);
+  yield { context, node, summary: `evaluated property`, detail: 2 };
+  return site.value;
+};
 
 evaluators.AssignmentExpression = function*(node, context) {
   const { left, right } = node;

@@ -1,6 +1,7 @@
 import { parse } from "@babel/parser";
 import deepcopy from "deepcopy";
-import { evaluate, RuntimeError } from "./evaluate";
+import { RuntimeError } from "./errors";
+import { evaluate } from "./evaluate";
 
 export default function(code) {
   const ast = parse(code);

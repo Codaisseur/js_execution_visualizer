@@ -33,7 +33,7 @@ export default function App() {
   }, [code]);
 
   const [_stepno, setStepno] = useState(0);
-  const [maxDetail, setMaxDetail] = useState(1);
+  const [maxDetail, setMaxDetail] = useState(2);
 
   const visibleHistory =
     history && history.length > 0

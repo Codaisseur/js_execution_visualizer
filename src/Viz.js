@@ -5,8 +5,41 @@ import styles from "./Viz.module.scss";
 export default function({ step: { node, context, pre, summary, detail } }) {
   return (
     <div>
-      <p>{summary}</p>
-      <Scope context={context} scopeRef={0} current={context.currentScope} />
+      <p>
+        <em>{summary}</em>
+      </p>
+      <div className={styles.split}>
+        <div className={styles.col}>
+          <Scope
+            context={context}
+            scopeRef={0}
+            current={context.currentScope}
+          />
+        </div>
+        <div className={styles.col}>
+          {context.objects.map((obj, i) => {
+            console.log(obj);
+            return (
+              <div key={i}>
+                <div>object #{i}</div>
+                <Obj obj={obj} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Obj({ obj }) {
+  const props = Object.values(obj.properties);
+
+  return (
+    <div className={styles.obj}>
+      {props.map((v, i) => (
+        <Var key={i} v={v} />
+      ))}
     </div>
   );
 }
@@ -24,12 +57,9 @@ function Scope({ context, scopeRef, current }) {
         <Var key={i} v={v} />
       ))}
       {scope.children.map(childRef => (
-        <Scope
-          key={childRef}
-          context={context}
-          scopeRef={childRef}
-          current={current}
-        />
+        <div key={childRef}>
+          <Scope context={context} scopeRef={childRef} current={current} />
+        </div>
       ))}
     </div>
   );
@@ -53,5 +83,6 @@ function Value({ value }) {
   if (typeof value === "string") return `"${value}"`;
   if (typeof value === "object" && "object_ref" in value)
     return `object #${value.object_ref}`;
+  if (typeof value === "boolean") return `${value}`;
   return value;
 }

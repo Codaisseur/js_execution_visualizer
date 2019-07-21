@@ -1,4 +1,6 @@
+.obj,
 .scope {
+  display: inline-block;
   padding: 0.4rem;
   margin: 0.4rem 0.2rem 0.2rem 0.2rem;
   border: 1px solid #ccc;
@@ -16,4 +18,12 @@
 .kind {
   font-family: serif;
   font-style: italic;
+}
+
+.split {
+  display: flex;
+
+  .col {
+    width: 50%;
+  }
 }
