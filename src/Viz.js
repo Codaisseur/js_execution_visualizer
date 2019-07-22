@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import cx from "classnames";
 import styles from "./Viz.module.scss";
 
@@ -19,8 +19,10 @@ export default function({ step: { node, context, pre, summary, detail } }) {
         <div className={styles.col}>
           {context.objects.map((obj, i) => {
             return (
-              <div key={i}>
-                <div>object #{i}</div>
+              <div key={i} style={{ marginBottom: ".4rem" }}>
+                <div>
+                  object #{i} - {obj.type}
+                </div>
                 <Obj obj={obj} />
               </div>
             );
@@ -32,30 +34,47 @@ export default function({ step: { node, context, pre, summary, detail } }) {
 }
 
 function Obj({ obj }) {
-  if (obj.type === "object") {
-    return (
-      <div className={styles.obj}>
-        {Object.values(obj.properties).map((v, i) => (
-          <Var key={i} v={v} />
-        ))}
-      </div>
-    );
-  } else if (obj.type === "array") {
-    return (
-      <div className={styles.obj}>
-        {Object.values(obj.elements).map((value, i) => (
-          <div key={i} className={styles.item}>
-            <span className={styles.kind}>item</span> <Value value={value} />
+  const [showBody, set_showBody] = useState(true);
+  return (
+    <div className={styles.obj}>
+      {obj.type === "array" && (
+        <>
+          {Object.values(obj.elements).map((value, i) => (
+            <div key={i} className={styles.item}>
+              <span className={styles.kind}>item</span> <Value value={value} />
+            </div>
+          ))}
+        </>
+      )}
+      {obj.type === "function" && (
+        <>
+          <div className={styles.item}>
+            <span
+              className={styles.kind}
+              style={{ cursor: "pointer" }}
+              onClick={() => set_showBody(!showBody)}
+            >
+              {showBody ? "hide" : "show"} body
+            </span>{" "}
+            {showBody && (
+              <pre
+                style={{
+                  margin: "0 0 0 .4rem",
+                  display: "inline-block",
+                  verticalAlign: "text-top"
+                }}
+              >
+                {obj.source}
+              </pre>
+            )}
           </div>
-        ))}
-        {Object.values(obj.properties).map((v, i) => (
-          <Var key={i} v={v} />
-        ))}
-      </div>
-    );
-  } else {
-    return null;
-  }
+        </>
+      )}
+      {Object.values(obj.properties).map((v, i) => (
+        <Var key={i} v={v} />
+      ))}
+    </div>
+  );
 }
 
 function Scope({ context, scopeRef, current }) {

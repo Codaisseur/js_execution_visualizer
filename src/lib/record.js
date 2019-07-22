@@ -1,11 +1,14 @@
 import { parse } from "@babel/parser";
 import deepcopy from "deepcopy";
 import { RuntimeError } from "./errors";
+import { makeInitialContext } from "./context";
 import { evaluate } from "./evaluate";
 
 export default function(code) {
   const ast = parse(code);
-  const runtime = evaluate(ast);
+  const context = makeInitialContext();
+  context.sourceCode = code;
+  const runtime = evaluate(ast, context);
 
   const history = [];
   try {

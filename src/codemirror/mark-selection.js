@@ -8,7 +8,6 @@
 // "CodeMirror-selectedtext" when the value is not a string.
 
 export default function(CodeMirror) {
-  console.log("applying plugin");
   CodeMirror.defineOption("styleSelectedText", false, function(cm, val, old) {
     var prev = old && old !== CodeMirror.Init;
     if (val && !prev) {
@@ -27,7 +26,6 @@ export default function(CodeMirror) {
   });
 
   function onCursorActivity(cm) {
-    console.log("cursorac", cm);
     if (cm.state.markedSelection)
       cm.operation(function() {
         update(cm);

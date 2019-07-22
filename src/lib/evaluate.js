@@ -152,7 +152,9 @@ evaluators.FunctionDeclaration = function*(node, context) {
     type: "function",
     definingScope: context.currentScope,
     params: node.params,
-    body: node.body
+    body: node.body,
+    source: context.getSourceCodeRange(node.loc),
+    properties: {}
   };
   const object_ref = context.objects.push(fn) - 1;
   scope.variables[node.id.name] = {
@@ -229,7 +231,9 @@ evaluators.ArrowFunctionExpression = function*(node, context) {
     type: "function",
     definingScope: context.currentScope,
     params: node.params,
-    body: node.body
+    body: node.body,
+    source: context.getSourceCodeRange(node.loc),
+    properties: {}
   };
   const object_ref = context.objects.push(fn) - 1;
   yield { context, node, summary: `evaluated arrow function`, detail: 2 };
