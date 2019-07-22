@@ -30,20 +30,27 @@ a {
     }
   }
 
-  .markedPre,
-  .markedPost {
-    border: 0;
-    border-style: solid;
-    border-top-width: 1px;
-    border-bottom-width: 1px;
-  }
   .markedPre {
     background: $preEval;
-    border-color: $preEval;
+    outline: 1px solid $preEval;
+    &:global(.CodeMirror-selectedtext) {
+      background: darken($preEval, 20%);
+      outline: 1px solid darken($preEval, 20%);
+    }
   }
   .markedPost {
     background: $postEval;
-    border-color: $postEval;
+    outline: 1px solid $postEval;
+    &:global(.CodeMirror-selectedtext) {
+      background: darken($postEval, 20%);
+      outline: 1px solid darken($postEval, 20%);
+    }
+  }
+  .markedPre,
+  .markedPost {
+    &:global(.CodeMirror-selectedtext) {
+      position: relative; // to prevent a little css bug
+    }
   }
 }
 

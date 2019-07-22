@@ -1,9 +1,6 @@
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import createPersistedState from "use-persisted-state";
-import { Controlled as CodeMirror } from "react-codemirror2";
-import "codemirror/mode/jsx/jsx";
-import "codemirror/lib/codemirror.css";
-import "./assets/codemirror-theme.scss";
+import CodeMirror from "./codemirror/codemirror";
 import styles from "./App.module.scss";
 
 import Viz from "./Viz";
@@ -20,7 +17,8 @@ const CM_OPTS = {
   lineNumbers: false,
   smartIndent: true,
   tabSize: 2,
-  indentWithTabs: false
+  indentWithTabs: false,
+  styleSelectedText: true
 };
 
 export default function App() {
@@ -111,7 +109,9 @@ const s1 = definite("variable");
         <CodeMirror
           className="editable"
           options={CM_OPTS}
-          editorDidMount={editor => (inst.current.editor = editor)}
+          editorDidMount={editor => {
+            inst.current.editor = editor;
+          }}
           value={code}
           onBeforeChange={(editor, data, value) => {
             setCode(value || "");
