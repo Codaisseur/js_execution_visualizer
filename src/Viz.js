@@ -21,18 +21,17 @@ export default function Viz({
           />
         </div>
         <div className={styles.col}>
-          {context.objects
-            .filter(o => showBuiltins || !o.builtin)
-            .map((obj, i) => {
-              return (
-                <div key={i} style={{ marginBottom: ".4rem" }}>
-                  <div>
-                    object #{i} - {obj.type}
-                  </div>
-                  <Obj obj={obj} />
+          {context.objects.map((obj, i) => {
+            const show = showBuiltins || !obj.builtin;
+            return show ? (
+              <div key={i} style={{ marginBottom: ".4rem" }}>
+                <div>
+                  object #{i} - {obj.type}
                 </div>
-              );
-            })}
+                <Obj obj={obj} />
+              </div>
+            ) : null;
+          })}
         </div>
       </div>
     </div>
@@ -89,17 +88,24 @@ function Scope({ context, scopeRef, current, showBuiltins }) {
   const isCurrent = current === scopeRef;
   const vars = Object.values(scope.variables);
 
-  if (!showBuiltins && scope._builtin) return null;
+  const show = showBuiltins || !scope._builtin;
+
+  const shownVars = show
+    ? vars.filter(v => showBuiltins || v.kind !== "builtin")
+    : [];
+
+  if (shownVars.length === 0 && scope.children.length === 0) return null;
+
+  const className =
+    shownVars.length === 0 && !show
+      ? ""
+      : cx({ [styles.scope]: true, [styles.isCurrent]: isCurrent });
 
   return (
-    <div
-      className={cx({ [styles.scope]: true, [styles.isCurrent]: isCurrent })}
-    >
-      {vars
-        .filter(v => showBuiltins || v.kind !== "builtin")
-        .map((v, i) => (
-          <Var key={i} v={v} />
-        ))}
+    <div className={className}>
+      {shownVars.map((v, i) => (
+        <Var key={i} v={v} />
+      ))}
       {scope.children.map(childRef => (
         <div key={childRef}>
           <Scope

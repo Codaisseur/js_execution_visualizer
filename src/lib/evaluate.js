@@ -78,7 +78,10 @@ evaluators.ReturnStatement = function*(node, context) {
 
 function makeNewScope(
   context,
-  { parentScope = context.currentScope, _builtin = false } = {}
+  {
+    parentScope = context.currentScope,
+    _builtin = context.scopes[context.currentScope]._builtin
+  } = {}
 ) {
   // Create an execution scope
   const scope = {
@@ -103,8 +106,8 @@ function* invokeFunction(
 ) {
   // Create an execution scope
   const [executionScope, executionScopeRef] = makeNewScope(context, {
-    definingScope,
-    _builtin: body._builtin
+    parentScope: definingScope,
+    _builtin: !!body._builtin // the !! is very important, not very elegant
   });
 
   // Apply new this binding

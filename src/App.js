@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useMemo } from "react";
+import { stripIndent } from "common-tags";
 import createPersistedState from "use-persisted-state";
 import CodeMirror from "./codemirror/codemirror";
 import styles from "./App.module.scss";
@@ -11,6 +12,47 @@ const usePersistedCode = createPersistedState("code");
 const usePersistedMaxDetail = createPersistedState("maxdetail");
 const usePersistedStepno = createPersistedState("stepno");
 const usePersistedShowBuiltins = createPersistedState("showbuiltins");
+
+const PRESETS = [
+  {
+    title: "just a variable",
+    code: stripIndent`
+      let n = 42;
+    `
+  },
+  {
+    title: "array push and access",
+    code: stripIndent`
+      const fruits = ["pear", "banana"];
+      fruits.push("jello");
+      const jello = fruits[fruits.length - 1];
+    `
+  },
+  {
+    title: "a closure and correct scoping",
+    code: stripIndent`
+      let adjective = "beautiful";
+      function make(a) {
+        return thing => {
+          return a + " " + adjective + " " + thing;
+        };
+      }
+      const definite = make("the");
+      const s1 = definite("variable");
+      adjective = "nested";
+      const s2 = definite("scope");
+    `
+  },
+  {
+    title: "single map+filter+reduce expression with arrow functions",
+    code: stripIndent`
+      const result = [10, 2, 3, 6]
+        .map(n => n - 2)
+        .filter(n => n > 3)
+        .reduce((a, b) => a + b, 0);
+    `
+  }
+];
 
 const CM_OPTS = {
   mode: "text/javascript",
@@ -137,21 +179,22 @@ export default function App() {
             runtimeError={runtimeError}
           />
           <div className={styles.main}>
-            {/* <div>
-              <label>
-                Step{" "}
-                <input
-                  style={{ width: "400px" }}
-                  min={0}
-                  max={visibleHistory.length - 1}
-                  step={1}
-                  value={stepno}
-                  onChange={e => setStepno(e.target.value)}
-                  type="range"
-                />
-              </label>
-            </div> */}
             <div>
+              <select
+                value=""
+                onChange={e => {
+                  const preset = PRESETS.find(
+                    ({ title }) => title === e.target.value
+                  );
+                  if (preset) setCode(preset.code);
+                }}
+              >
+                <option value="">-- Select a code preset --</option>
+                {PRESETS.map(({ title, code }) => (
+                  <option key={title}>{title}</option>
+                ))}
+              </select>
+              {" / "}
               <label>
                 Expression detail?{" "}
                 <input
@@ -159,13 +202,26 @@ export default function App() {
                   checked={maxDetail === 2}
                   onChange={() => setMaxDetail(3 - maxDetail)}
                 />
-              </label>{" "}
+              </label>
+              {" / "}
               <label>
                 Show builtins?{" "}
                 <input
                   type="checkbox"
                   checked={showBuiltins}
                   onChange={() => setShowBuiltins(!showBuiltins)}
+                />
+              </label>
+              {" / "}
+              <label>
+                Step{" "}
+                <input
+                  min={0}
+                  max={visibleHistory.length - 1}
+                  step={1}
+                  value={stepno}
+                  onChange={e => setStepno(e.target.value)}
+                  type="range"
                 />
               </label>
             </div>
