@@ -12,9 +12,11 @@ function lookup(context, name, ref) {
   }
 }
 
+// Note: `name` could be non-primitive, and should actually
+//  be propertly coerced and stuff...
 function lookupProperty(context, name, object_ref) {
   const object = context.objects[object_ref];
-  if (object.properties[name]) {
+  if (object.properties[name] !== undefined) {
     return object_ref;
   } else if (object.prototype !== undefined) {
     return lookupProperty(context, name, object.prototype);
@@ -67,38 +69,42 @@ locators.MemberExpression = function*(
   { makeIfNonexistent = false }
 ) {
   const objectValue = yield* evaluate(node.object, context);
-  if (typeof objectValue !== "object" || !("object_ref" in objectValue))
-    // (actually, you can do things like `(2).toFixed(2)`)
+  if (
+    typeof objectValue.value !== "object" ||
+    !("object_ref" in objectValue.value)
+  )
+    // (actually though, you can do things like `(2).toFixed(2)`)
     throw new RuntimeError(
       "cannot use memberexpression for non-object",
       node.object
     );
+  const { object_ref } = objectValue.value;
 
-  if (node.property.type !== "Identifier") throw new NotImplemented();
+  let propertyName;
+  if (node.computed) {
+    propertyName = (yield* evaluate(node.property, context)).value;
+  } else {
+    if (node.property.type !== "Identifier") throw new NotImplemented();
+    propertyName = node.property.name;
+  }
 
-  const { object_ref } = objectValue;
-  const defining_object_ref = lookupProperty(
-    context,
-    node.property.name,
-    object_ref
-  );
+  const defining_object_ref = lookupProperty(context, propertyName, object_ref);
   if (defining_object_ref === null) {
     if (makeIfNonexistent) {
-      const site = (context.objects[object_ref].properties[
-        node.property.name
-      ] = {
-        name: node.property.name,
+      const site = (context.objects[object_ref].properties[propertyName] = {
+        name: propertyName,
         kind: "property"
       });
       yield {
         context,
         node,
-        summary: `made new property ${node.property.name}`,
+        summary: `made new property ${propertyName}`,
         detail: 2
       };
       return {
+        accessing_object_ref: object_ref,
         object_ref,
-        name: node.property.name,
+        name: propertyName,
         site
       };
     } else {
@@ -113,8 +119,9 @@ locators.MemberExpression = function*(
     detail: 2
   };
   return {
+    accessing_object_ref: object_ref,
     object_ref: defining_object_ref,
-    name: node.property.name,
-    site: context.objects[defining_object_ref].properties[node.property.name]
+    name: propertyName,
+    site: context.objects[defining_object_ref].properties[propertyName]
   };
 };

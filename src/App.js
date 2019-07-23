@@ -10,6 +10,7 @@ import record from "./lib/record";
 const usePersistedCode = createPersistedState("code");
 const usePersistedMaxDetail = createPersistedState("maxdetail");
 const usePersistedStepno = createPersistedState("stepno");
+const usePersistedShowBuiltins = createPersistedState("showbuiltins");
 
 const CM_OPTS = {
   mode: "text/javascript",
@@ -23,21 +24,20 @@ const CM_OPTS = {
 
 export default function App() {
   const inst = useRef({ editor: null, marker: null });
-  const [code, setCode] = usePersistedCode(`let adj = "kind";
-const f = a => {
-  return thing => a + " " + adj + " " + thing;
-};
-const definite = f("the");
-const s1 = definite("variable");
-`);
+  const [code, setCode] = usePersistedCode(`const result = [10, 2, 3, 6]
+  .map(n => n - 2)
+  .filter(n => n > 3)
+  .reduce((a, b) => a + b, 0);`);
   const { error, runtimeError, history } = useMemo(() => {
     try {
       return record(code);
     } catch (error) {
+      console.error(error);
       return { error };
     }
   }, [code]);
 
+  const [showBuiltins, setShowBuiltins] = usePersistedShowBuiltins(false);
   const [_stepno, setStepno] = usePersistedStepno(0);
   const [maxDetail, setMaxDetail] = usePersistedMaxDetail(2);
 
@@ -61,13 +61,15 @@ const s1 = definite("variable");
     if (!step) return;
     const doc = inst.current.editor.getDoc();
     const loc = step.node.loc;
-    inst.current.marker = doc.markText(
-      { line: loc.start.line - 1, ch: loc.start.column },
-      { line: loc.end.line - 1, ch: loc.end.column },
-      {
-        className: step.pre ? styles.markedPre : styles.markedPost
-      }
-    );
+    if (loc) {
+      inst.current.marker = doc.markText(
+        { line: loc.start.line - 1, ch: loc.start.column },
+        { line: loc.end.line - 1, ch: loc.end.column },
+        {
+          className: step.pre ? styles.markedPre : styles.markedPost
+        }
+      );
+    }
   }, [inst, step]);
 
   return (
@@ -157,9 +159,17 @@ const s1 = definite("variable");
                   checked={maxDetail === 2}
                   onChange={() => setMaxDetail(3 - maxDetail)}
                 />
+              </label>{" "}
+              <label>
+                Show builtins?{" "}
+                <input
+                  type="checkbox"
+                  checked={showBuiltins}
+                  onChange={() => setShowBuiltins(!showBuiltins)}
+                />
               </label>
             </div>
-            <Viz step={step} />
+            <Viz step={step} showBuiltins={showBuiltins} />
             {runtimeError && (
               <div className={styles.error}>
                 <p>Runtime error: {runtimeError.message}</p>

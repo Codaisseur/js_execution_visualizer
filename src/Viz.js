@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import cx from "classnames";
 import styles from "./Viz.module.scss";
 
-export default function({ step: { node, context, pre, summary, detail } }) {
+export default function Viz({
+  step: { node, context, pre, summary, detail },
+  showBuiltins
+}) {
   return (
     <div>
       <p>
@@ -14,19 +17,22 @@ export default function({ step: { node, context, pre, summary, detail } }) {
             context={context}
             scopeRef={0}
             current={context.currentScope}
+            showBuiltins={showBuiltins}
           />
         </div>
         <div className={styles.col}>
-          {context.objects.map((obj, i) => {
-            return (
-              <div key={i} style={{ marginBottom: ".4rem" }}>
-                <div>
-                  object #{i} - {obj.type}
+          {context.objects
+            .filter(o => showBuiltins || !o.builtin)
+            .map((obj, i) => {
+              return (
+                <div key={i} style={{ marginBottom: ".4rem" }}>
+                  <div>
+                    object #{i} - {obj.type}
+                  </div>
+                  <Obj obj={obj} />
                 </div>
-                <Obj obj={obj} />
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     </div>
@@ -35,9 +41,10 @@ export default function({ step: { node, context, pre, summary, detail } }) {
 
 function Obj({ obj }) {
   const [showBody, set_showBody] = useState(true);
+
   return (
     <div className={styles.obj}>
-      {obj.type === "array" && (
+      {/* {obj.type === "array" && (
         <>
           {Object.values(obj.elements).map((value, i) => (
             <div key={i} className={styles.item}>
@@ -45,7 +52,7 @@ function Obj({ obj }) {
             </div>
           ))}
         </>
-      )}
+      )} */}
       {obj.type === "function" && (
         <>
           <div className={styles.item}>
@@ -70,28 +77,37 @@ function Obj({ obj }) {
           </div>
         </>
       )}
-      {Object.values(obj.properties).map((v, i) => (
+      {Object.values(obj.properties || {}).map((v, i) => (
         <Var key={i} v={v} />
       ))}
     </div>
   );
 }
 
-function Scope({ context, scopeRef, current }) {
+function Scope({ context, scopeRef, current, showBuiltins }) {
   const scope = context.scopes[scopeRef];
   const isCurrent = current === scopeRef;
   const vars = Object.values(scope.variables);
+
+  if (!showBuiltins && scope._builtin) return null;
 
   return (
     <div
       className={cx({ [styles.scope]: true, [styles.isCurrent]: isCurrent })}
     >
-      {vars.map((v, i) => (
-        <Var key={i} v={v} />
-      ))}
+      {vars
+        .filter(v => showBuiltins || v.kind !== "builtin")
+        .map((v, i) => (
+          <Var key={i} v={v} />
+        ))}
       {scope.children.map(childRef => (
         <div key={childRef}>
-          <Scope context={context} scopeRef={childRef} current={current} />
+          <Scope
+            context={context}
+            scopeRef={childRef}
+            current={current}
+            showBuiltins={showBuiltins}
+          />
         </div>
       ))}
     </div>
@@ -117,5 +133,9 @@ function Value({ value }) {
   if (typeof value === "object" && "object_ref" in value)
     return `object #${value.object_ref}`;
   if (typeof value === "boolean") return `${value}`;
+  if (typeof value === "object") {
+    console.log("object value???", value);
+    return "???";
+  }
   return value;
 }

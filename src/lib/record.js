@@ -11,11 +11,16 @@ export default function(code) {
   const runtime = evaluate(ast, context);
 
   const history = [];
+  let i = 0;
   try {
     for (const report of runtime) {
-      history.push(deepcopy(report));
-      if (history.length > 100) {
-        throw new Error("too many steps!");
+      if (!report.node._builtin) {
+        history.push(deepcopy(report));
+      }
+      if (i++ > 1000) {
+        console.error("too many steps", history);
+        return { history, runtimeError: new Error("too many steps!") };
+        // throw new Error("too many steps!");
       }
     }
   } catch (e) {
