@@ -49,6 +49,6 @@ Because getting a feel for how a computer operates is essential. I'm not sure / 
 - [interpreter] https://github.com/NeilFraser/JS-Interpreter
 
 **Why? Does it improve?** Not sure if it'll improve. Tyler's viz is just excellent, and beautiful as well. It has closure scopes too, which Pythontutor does not. So probs my version is going to be _strictly worse_ than Tyler's :P (In correctness and looks.) But there are a few ways in which I might be adding:
-- ES6 support (But then because my app is educational, I'm actually stripping things like `var`... So our syntaxes will be non-overlapping, haha...)
+- ES6 support (But then because this app is educational, and we educate good practices, I'm actually stripping things like `var`... So our syntaxes will be non-overlapping, haha...)
 - More configurable in what's included in execution history. I generate "flat" report objects to history, which can be filtered all kinds of ways, incl. detail but also including pre/post execution, specific nodes, etc.
 - Ah, and where Pythontutor does not have closure scopes, Tyler's viz does not have an object reference graph. I'll have both :D
