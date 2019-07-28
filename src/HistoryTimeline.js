@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useEffect } from "react";
 import cx from "classnames";
 import styles from "./HistoryTimeline.module.scss";
 
@@ -21,6 +21,21 @@ export default function HistoryTimeline({
 
   const moveData = {};
   const scrubberRef = useRef();
+  const buttonRefs = useRef(history.map(() => React.createRef()));
+
+  const focus = useCallback(i => {
+    if (
+      buttonRefs.current &&
+      buttonRefs.current[i] &&
+      buttonRefs.current[i].current
+    ) {
+      buttonRefs.current[i].current.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    focus(value);
+  }, [focus, value]);
 
   const handleMouseDown = useCallback(
     e => {
@@ -42,11 +57,12 @@ export default function HistoryTimeline({
       );
       document.addEventListener("mousemove", e => {
         if (moveData.isMouseDown && scrubberRef.current) {
-          const p = e.clientX / scrubberRef.current.clientWidth;
+          const { x, width } = scrubberRef.current.getBoundingClientRect();
+          const p = (e.clientX - x) / width;
 
           const newValue = Math.min(
             history.length - 1,
-            Math.max(0, Math.round(p * history.length))
+            Math.max(0, Math.floor(p * history.length))
           );
 
           onChange(newValue);
@@ -57,33 +73,35 @@ export default function HistoryTimeline({
   );
 
   return (
-    <div>
-      <div
-        className={styles.timeline}
-        onKeyDown={onKeyDown}
-        ref={scrubberRef}
-        onMouseDown={handleMouseDown}
-      >
-        {history.map((step, i) => {
-          return (
-            <div
-              key={i}
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                onChange(i);
-              }}
-              className={cx({
-                [styles.step]: true,
-                [styles.selected]: i === parseInt(value)
-              })}
-            />
-          );
-        })}
-        {runtimeError && (
-          <div className={cx([styles.step, styles.runtimeError])} />
-        )}
-      </div>
+    <div
+      className={styles.timeline}
+      onKeyDown={onKeyDown}
+      ref={scrubberRef}
+      onMouseDown={handleMouseDown}
+    >
+      {history.map((step, i) => {
+        return (
+          <button
+            key={i}
+            ref={buttonRefs.current[i]}
+            onClick={e => {
+              e.preventDefault();
+              e.stopPropagation();
+              onChange(i);
+              focus(i);
+            }}
+            className={cx({
+              [styles.step]: true,
+              [styles.selected]: i === parseInt(value)
+            })}
+          >
+            {i + 1}
+          </button>
+        );
+      })}
+      {runtimeError && (
+        <div className={cx([styles.step, styles.runtimeError])} />
+      )}
     </div>
   );
 }
