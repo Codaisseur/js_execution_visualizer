@@ -1,6 +1,6 @@
 {
   "name": "visualizing_js_execution",
-  "homepage": "https://codaisseur.github.io/visualized-execution/",
+  "homepage": "https://visualized-execution.js.org/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -20,7 +20,7 @@
     "use-persisted-state": "^0.3.0"
   },
   "scripts": {
-    "predeploy": "yarn run build",
+    "predeploy": "yarn run build && echo 'visualized-execution.js.org' > build/CNAME",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
