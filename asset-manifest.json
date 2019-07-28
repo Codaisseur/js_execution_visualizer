@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/js_execution_visualizer/static/css/main.7962e1aa.chunk.css",
-    "main.js": "/js_execution_visualizer/static/js/main.ad0b96d9.chunk.js",
-    "main.js.map": "/js_execution_visualizer/static/js/main.ad0b96d9.chunk.js.map",
-    "runtime~main.js": "/js_execution_visualizer/static/js/runtime~main.224c2f5b.js",
-    "runtime~main.js.map": "/js_execution_visualizer/static/js/runtime~main.224c2f5b.js.map",
-    "static/css/2.0ede6d05.chunk.css": "/js_execution_visualizer/static/css/2.0ede6d05.chunk.css",
-    "static/js/2.221cb752.chunk.js": "/js_execution_visualizer/static/js/2.221cb752.chunk.js",
-    "static/js/2.221cb752.chunk.js.map": "/js_execution_visualizer/static/js/2.221cb752.chunk.js.map",
-    "index.html": "/js_execution_visualizer/index.html",
-    "precache-manifest.dbab31fa373b5ca9136f234912292622.js": "/js_execution_visualizer/precache-manifest.dbab31fa373b5ca9136f234912292622.js",
-    "service-worker.js": "/js_execution_visualizer/service-worker.js",
-    "static/css/2.0ede6d05.chunk.css.map": "/js_execution_visualizer/static/css/2.0ede6d05.chunk.css.map",
-    "static/css/main.7962e1aa.chunk.css.map": "/js_execution_visualizer/static/css/main.7962e1aa.chunk.css.map"
+    "main.css": "/visualized-execution/static/css/main.9039c29e.chunk.css",
+    "main.js": "/visualized-execution/static/js/main.d73aa15e.chunk.js",
+    "main.js.map": "/visualized-execution/static/js/main.d73aa15e.chunk.js.map",
+    "runtime~main.js": "/visualized-execution/static/js/runtime~main.293e43e2.js",
+    "runtime~main.js.map": "/visualized-execution/static/js/runtime~main.293e43e2.js.map",
+    "static/css/2.0ede6d05.chunk.css": "/visualized-execution/static/css/2.0ede6d05.chunk.css",
+    "static/js/2.22fe6663.chunk.js": "/visualized-execution/static/js/2.22fe6663.chunk.js",
+    "static/js/2.22fe6663.chunk.js.map": "/visualized-execution/static/js/2.22fe6663.chunk.js.map",
+    "index.html": "/visualized-execution/index.html",
+    "precache-manifest.e0ea93b3f237c289e83c9527241d3fe8.js": "/visualized-execution/precache-manifest.e0ea93b3f237c289e83c9527241d3fe8.js",
+    "service-worker.js": "/visualized-execution/service-worker.js",
+    "static/css/2.0ede6d05.chunk.css.map": "/visualized-execution/static/css/2.0ede6d05.chunk.css.map",
+    "static/css/main.9039c29e.chunk.css.map": "/visualized-execution/static/css/main.9039c29e.chunk.css.map"
   }
 }
