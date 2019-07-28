@@ -182,18 +182,6 @@ export default function App() {
                   onChange={() => setShowBuiltins(!showBuiltins)}
                 />
               </label>
-              {" / "}
-              <label>
-                Step{" "}
-                <input
-                  min={0}
-                  max={visibleHistory.length - 1}
-                  step={1}
-                  value={stepno}
-                  onChange={e => setStepno(e.target.value)}
-                  type="range"
-                />
-              </label>
             </div>
             <Viz step={step} showBuiltins={showBuiltins} />
             {runtimeError && (
