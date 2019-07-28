@@ -1,6 +1,6 @@
 {
   "name": "visualizing_js_execution",
-  "homepage": "https://codaisseur.github.io/js_execution_visualizer/",
+  "homepage": "https://codaisseur.github.io/visualized-execution/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
