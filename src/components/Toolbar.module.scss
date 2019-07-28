@@ -1,0 +1,45 @@
+@import "../assets/config";
+
+.header {
+  border-bottom: 1px solid #ccc;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 0 3rem;
+
+  .logo {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2.6rem;
+    width: 2.6rem;
+
+    rect {
+      fill: white;
+    }
+    path {
+      fill: black;
+    }
+
+    &:hover {
+      rect {
+        fill: $red;
+      }
+      path {
+        fill: white;
+      }
+    }
+  }
+
+  h1 {
+    font-size: 1rem;
+    text-align: center;
+    flex-grow: 1;
+
+    em {
+      font-weight: normal;
+    }
+  }
+}
