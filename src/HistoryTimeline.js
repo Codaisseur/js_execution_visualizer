@@ -37,39 +37,45 @@ export default function HistoryTimeline({
     focus(value);
   }, [focus, value]);
 
-  const handleMouseDown = useCallback(
+  const moveEnd = useCallback(() => (moveData.isMouseDown = false), [moveData]);
+
+  document.addEventListener("mouseup", () => moveEnd());
+  document.addEventListener("touchend", () => moveEnd());
+  document.addEventListener("touchcancel", () => moveEnd());
+
+  const move = useCallback(
+    e => {
+      if (moveData.isMouseDown && scrubberRef.current) {
+        const { x, width } = scrubberRef.current.getBoundingClientRect();
+        const p = (e.clientX - x) / width;
+
+        const newValue = Math.min(
+          history.length - 1,
+          Math.max(0, Math.floor(p * history.length))
+        );
+
+        onChange(newValue);
+      }
+    },
+    [moveData, onChange, history]
+  );
+
+  document.addEventListener("mousemove", e => move(e));
+  document.addEventListener("touchmove", e => move(e));
+
+  const moveStart = useCallback(
     e => {
       e.preventDefault();
       e.stopPropagation();
 
       Object.assign(moveData, {
         initialMousePos: {
-          x: e.clientX,
-          y: e.clientY
+          x: e.clientX
         },
-        initialValue: value,
         isMouseDown: true
       });
-
-      document.addEventListener(
-        "mouseup",
-        () => (moveData.isMouseDown = false)
-      );
-      document.addEventListener("mousemove", e => {
-        if (moveData.isMouseDown && scrubberRef.current) {
-          const { x, width } = scrubberRef.current.getBoundingClientRect();
-          const p = (e.clientX - x) / width;
-
-          const newValue = Math.min(
-            history.length - 1,
-            Math.max(0, Math.floor(p * history.length))
-          );
-
-          onChange(newValue);
-        }
-      });
     },
-    [value, onChange, history, moveData]
+    [moveData]
   );
 
   return (
@@ -77,7 +83,8 @@ export default function HistoryTimeline({
       className={styles.timeline}
       onKeyDown={onKeyDown}
       ref={scrubberRef}
-      onMouseDown={handleMouseDown}
+      onTouchStart={moveStart}
+      onMouseDown={moveStart}
     >
       {history.map((step, i) => {
         return (
