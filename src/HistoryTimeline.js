@@ -43,25 +43,22 @@ export default function HistoryTimeline({
   document.addEventListener("touchend", () => moveEnd());
   document.addEventListener("touchcancel", () => moveEnd());
 
-  const move = useCallback(
-    e => {
-      if (moveData.isMouseDown && scrubberRef.current) {
-        const { x, width } = scrubberRef.current.getBoundingClientRect();
-        const p = (e.clientX - x) / width;
+  const move = e => {
+    if (moveData.isMouseDown && scrubberRef.current) {
+      const { x, width } = scrubberRef.current.getBoundingClientRect();
+      const p = (e.clientX - x) / width;
 
-        const newValue = Math.min(
-          history.length - 1,
-          Math.max(0, Math.floor(p * history.length))
-        );
+      const newValue = Math.min(
+        history.length - 1,
+        Math.max(0, Math.floor(p * history.length))
+      );
 
-        onChange(newValue);
-      }
-    },
-    [moveData, onChange, history]
-  );
+      onChange(newValue);
+    }
+  };
 
   document.addEventListener("mousemove", e => move(e));
-  document.addEventListener("touchmove", e => move(e));
+  document.addEventListener("touchmove", e => move(e.touches[0]));
 
   const moveStart = useCallback(
     e => {

@@ -3,6 +3,7 @@
 .timeline {
   margin: 0 $padding;
   display: flex;
+  touch-action: none;
 
   .step {
     padding: 0;

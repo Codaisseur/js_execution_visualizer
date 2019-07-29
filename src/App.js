@@ -183,7 +183,7 @@ export default function App() {
                 />
               </label>
             </div>
-            <Viz step={step} showBuiltins={showBuiltins} />
+            {step && <Viz step={step} showBuiltins={showBuiltins} />}
             {runtimeError && (
               <div className={styles.error}>
                 <p>Runtime error: {runtimeError.message}</p>
