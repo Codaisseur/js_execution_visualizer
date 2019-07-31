@@ -8,17 +8,6 @@ export default function HistoryTimeline({
   onChange,
   runtimeError
 }) {
-  const onKeyDown = useCallback(
-    e => {
-      if (e.keyCode === 37) {
-        onChange(value - 1);
-      } else if (e.keyCode === 39) {
-        onChange(value + 1);
-      }
-    },
-    [value, onChange]
-  );
-
   const moveData = {};
   const scrubberRef = useRef();
   const buttonRefs = useRef(history.map(() => React.createRef()));
@@ -32,6 +21,19 @@ export default function HistoryTimeline({
       buttonRefs.current[i].current.focus();
     }
   }, []);
+
+  const onKeyDown = useCallback(
+    e => {
+      if (e.keyCode === 37) {
+        onChange(value - 1);
+        focus(value - 1);
+      } else if (e.keyCode === 39) {
+        onChange(value + 1);
+        focus(value + 1);
+      }
+    },
+    [value, focus, onChange]
+  );
 
   const moveEnd = useCallback(() => (moveData.isMouseDown = false), [moveData]);
 

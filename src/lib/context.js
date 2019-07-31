@@ -78,8 +78,7 @@ export function makeInitialContext() {
     builtin.objects.push({
       builtin: true,
       type: "function",
-      body: _logBuiltin.body,
-      params: _logBuiltin.params,
+      node: _logBuiltin,
       source: "(builtin)"
     }) - 1;
 
@@ -99,8 +98,7 @@ export function makeInitialContext() {
     builtin.objects.push({
       builtin: true,
       type: "function",
-      body: _mapBuiltin.body,
-      params: _mapBuiltin.params,
+      node: _mapBuiltin,
       source: "(builtin)"
     }) - 1;
 
@@ -108,8 +106,7 @@ export function makeInitialContext() {
     builtin.objects.push({
       builtin: true,
       type: "function",
-      body: _filterBuiltin.body,
-      params: _filterBuiltin.params,
+      node: _filterBuiltin,
       source: "(builtin)"
     }) - 1;
 
@@ -117,8 +114,7 @@ export function makeInitialContext() {
     builtin.objects.push({
       builtin: true,
       type: "function",
-      body: _reduceBuiltin.body,
-      params: _reduceBuiltin.params,
+      node: _reduceBuiltin,
       source: "(builtin)"
     }) - 1;
 
@@ -126,8 +122,7 @@ export function makeInitialContext() {
     builtin.objects.push({
       builtin: true,
       type: "function",
-      body: _pushBuiltin.body,
-      params: _pushBuiltin.params,
+      node: _pushBuiltin,
       source: "(builtin)"
     }) - 1;
 

@@ -3,11 +3,13 @@ import deepcopy from "deepcopy";
 import { RuntimeError } from "./errors";
 import { makeInitialContext } from "./context";
 import { evaluate } from "./evaluate";
+import performEscapeAnalysis from "./performEscapeAnalysis";
 
 const sleep = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
 
 export default async function record(code) {
   const ast = parse(code);
+  performEscapeAnalysis(ast);
   const context = makeInitialContext();
   context.sourceCode = code;
   const runtime = evaluate(ast, context);

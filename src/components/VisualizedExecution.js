@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { stripIndent } from "common-tags";
 import createPersistedState from "use-persisted-state";
 import CodeMirror from "../codemirror/codemirror";
@@ -13,6 +13,7 @@ const usePersistedCode = createPersistedState("code");
 const usePersistedMaxDetail = createPersistedState("maxdetail");
 const usePersistedStepno = createPersistedState("stepno");
 const usePersistedShowBuiltins = createPersistedState("showbuiltins");
+const usePersisted_escapeAnalysis = createPersistedState("escapeAnalysis");
 
 const PRESETS = [
   {
@@ -52,6 +53,28 @@ const PRESETS = [
         .filter(n => n > 3)
         .reduce((a, b) => a + b, 0);
     `
+  },
+  {
+    title: "variable escapes",
+    code: stripIndent`
+      let x = 0;
+      let y = 0;
+
+      function mf(n) {
+        return () => {
+          function bla() {
+            // let n = 6;
+            y = n + 2;
+          }
+          bla();
+        };
+      }
+
+      const o = {};
+      o.f = mf(10);
+
+      o.f();
+    `
   }
 ];
 
@@ -76,9 +99,14 @@ export default function App() {
     code
   ]);
 
+  if (error) console.error("Compile error", error);
+
   const [showBuiltins, setShowBuiltins] = usePersistedShowBuiltins(false);
   const [_stepno, setStepno] = usePersistedStepno(0);
   const [maxDetail, setMaxDetail] = usePersistedMaxDetail(2);
+  const [escapeAnalysis, set_escapeAnalysis] = usePersisted_escapeAnalysis(
+    true
+  );
 
   const history =
     value && value.history.length > 0
@@ -185,8 +213,23 @@ export default function App() {
                   onChange={() => setShowBuiltins(!showBuiltins)}
                 />
               </label>
+              {" / "}
+              <label>
+                Escape analysis?{" "}
+                <input
+                  type="checkbox"
+                  checked={escapeAnalysis}
+                  onChange={() => set_escapeAnalysis(!escapeAnalysis)}
+                />
+              </label>
             </div>
-            {step && <Viz step={step} showBuiltins={showBuiltins} />}
+            {step && (
+              <Viz
+                step={step}
+                showBuiltins={showBuiltins}
+                escapeAnalysis={escapeAnalysis}
+              />
+            )}
             {value.runtimeError && (
               <div className={styles.error}>
                 <p>Runtime error: {value.runtimeError.message}</p>

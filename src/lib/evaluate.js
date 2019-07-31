@@ -99,7 +99,7 @@ function makeNewScope(
 }
 
 function* invokeFunction(
-  { definingScope, arrow, params, body },
+  { definingScope, arrow, node },
   args,
   newThisBinding,
   context
@@ -107,7 +107,7 @@ function* invokeFunction(
   // Create an execution scope
   const [executionScope, executionScopeRef] = makeNewScope(context, {
     parentScope: definingScope,
-    _builtin: !!body._builtin // the !! is very important, not very elegant
+    _builtin: !!node.body._builtin // the !! is very important, not very elegant
   });
 
   // Apply new this binding
@@ -116,7 +116,7 @@ function* invokeFunction(
   }
 
   // Populate with given arguments
-  for (const [i, param] of params.entries()) {
+  for (const [i, param] of node.params.entries()) {
     if (param.type !== "Identifier")
       throw new NotImplemented(
         `Sorry, can't deal with ${param.type} params yet :(`
@@ -130,15 +130,33 @@ function* invokeFunction(
   }
 
   const executionContext = { ...context, currentScope: executionScopeRef };
-  if (body.type === "BlockStatement") {
-    return yield* Return.from(function*() {
-      return yield* evaluate(body, executionContext, {
+
+  let returnValue;
+
+  if (node.body.type === "BlockStatement") {
+    returnValue = yield* Return.from(function*() {
+      return yield* evaluate(node.body, executionContext, {
         skipScope: true
       });
     });
   } else {
-    return yield* evaluate(body, executionContext);
+    returnValue = yield* evaluate(node.body, executionContext);
   }
+
+  // console.log("done executing function!", node._FRV, node._hasEscapes);
+  if (!node._hasEscapes) {
+    // console.log("definitely no escapes, freeing scope:", executionScopeRef);
+    executionScope.freed = true;
+    // const parentScope =
+    //   context.scopes[context.scopes[executionScopeRef].parent];
+    // parentScope.children.splice(
+    //   parentScope.children.indexOf(executionScopeRef),
+    //   1
+    // );
+    // delete context.scopes[executionScopeRef];
+  }
+
+  return returnValue;
 }
 
 evaluators.CallExpression = function*(node, context) {
@@ -201,8 +219,7 @@ evaluators.FunctionDeclaration = function*(node, context) {
     type: "function",
     arrow: false,
     definingScope: context.currentScope,
-    params: node.params,
-    body: node.body,
+    node,
     source: context.getSourceCodeRange(node),
     properties: {}
   };
@@ -291,8 +308,7 @@ evaluators.ArrowFunctionExpression = function*(node, context) {
     type: "function",
     arrow: true,
     definingScope: context.currentScope,
-    params: node.params,
-    body: node.body,
+    node,
     source: context.getSourceCodeRange(node),
     properties: {}
   };

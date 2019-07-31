@@ -4,7 +4,8 @@ import styles from "./Viz.module.scss";
 
 export default function Viz({
   step: { node, context, pre, summary, detail },
-  showBuiltins
+  showBuiltins,
+  escapeAnalysis = false
 }) {
   return (
     <div>
@@ -18,6 +19,7 @@ export default function Viz({
             scopeRef={0}
             current={context.currentScope}
             showBuiltins={showBuiltins}
+            escapeAnalysis={escapeAnalysis}
           />
         </div>
         <div className={styles.col}>
@@ -83,7 +85,13 @@ function Obj({ obj }) {
   );
 }
 
-function Scope({ context, scopeRef, current, showBuiltins }) {
+function Scope({
+  context,
+  scopeRef,
+  current,
+  showBuiltins,
+  escapeAnalysis = false
+}) {
   const scope = context.scopes[scopeRef];
   const isCurrent = current === scopeRef;
   const vars = Object.values(scope.variables);
@@ -95,6 +103,7 @@ function Scope({ context, scopeRef, current, showBuiltins }) {
     : [];
 
   if (shownVars.length === 0 && scope.children.length === 0) return null;
+  if (escapeAnalysis && scope.freed) return null;
 
   const className =
     shownVars.length === 0 && !show
@@ -113,6 +122,7 @@ function Scope({ context, scopeRef, current, showBuiltins }) {
             scopeRef={childRef}
             current={current}
             showBuiltins={showBuiltins}
+            escapeAnalysis={escapeAnalysis}
           />
         </div>
       ))}
