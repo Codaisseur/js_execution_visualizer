@@ -1,4 +1,4 @@
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback } from "react";
 import cx from "classnames";
 import styles from "./HistoryTimeline.module.scss";
 
