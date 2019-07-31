@@ -1,4 +1,6 @@
 import React from "react";
+import "katex/dist/katex.min.css";
+import { InlineMath, BlockMath } from "react-katex";
 import styles from "./ProjectInfo.module.scss";
 
 export default function ProjectInfo() {
@@ -20,7 +22,7 @@ export default function ProjectInfo() {
           when it executes JavaScript code.
         </p>
 
-        <h3>TODO</h3>
+        <h2>TODO</h2>
         <p>Any help is appreciated, BTW!</p>
         <p>
           <input type="checkbox" checked={false} />
@@ -59,13 +61,57 @@ export default function ProjectInfo() {
           example, as part of prediction-exercises.
         </p>
 
-        <h3>Technical details</h3>
+        <h2>Technical details</h2>
         <p>
-          Can be found @{" "}
+          Original idea, motivation and background can be found @{" "}
           <a href="https://github.com/Codaisseur/visualized-execution">
             https://github.com/Codaisseur/visualized-execution
           </a>
         </p>
+
+        <h3>Escape analysis</h3>
+        <p>
+          A <em>static</em> escape analysis is used to remove dangling execution
+          scopes from the visualization. Static, because we determine whether a
+          scope is definitely escape-free based on a purely lexical analysis. It
+          can happen that certain scopes are not marked escape-free that in fact
+          are due to runtime considerations, but those are left out.
+        </p>
+        <p>
+          A scope might have an escaping variable, if one of its subscopes has
+          one, or one of its own variables has possibly escaped:
+        </p>
+        <BlockMath
+          math={String.raw`
+            \textrm{Escape}(S)
+            ~\Leftrightarrow~
+            \exists_{v \in S} \big[
+              \textrm{Escape}(v, S)
+            \big]
+            \lor
+            \exists_{S' \in S} \big[
+              \textrm{Escape}(S')
+            \big]
+          `}
+        />
+        <p>
+          A variable can only escape via a function (though maybe nested
+          arbitrarily deep) within that scope, which in which that variable
+          occurs:
+        </p>
+        <BlockMath
+          math={String.raw`
+            \textrm{Escape}(v, S)
+            ~\Leftrightarrow~
+            \exists_{f \in S} \big[
+              v \in \textrm{FV}(f)
+            \big]
+            \lor
+            \exists_{S' \in S} \big[
+              \textrm{Escape}(v, S')
+            \big]
+          `}
+        />
       </div>
     </div>
   );

@@ -152,12 +152,13 @@ export function makeInitialContext() {
       prototype: _Object
     }) - 1;
 
-  const __logs__ = builtin.objects.push({
-    builtin: true,
-    type: "array",
-    prototype: _Array,
-    properties: {}
-  });
+  const __logs__ =
+    builtin.objects.push({
+      builtin: true,
+      type: "array",
+      prototype: _Array,
+      properties: {}
+    }) - 1;
 
   return {
     scopes: [

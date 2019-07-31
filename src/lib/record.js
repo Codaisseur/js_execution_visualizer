@@ -13,7 +13,7 @@ export default function(code) {
   const history = [];
   let i = 0;
   try {
-    for (const report of runtime) {
+    for (let report of runtime) {
       if (!report.node._builtin) {
         history.push(deepcopy(report));
       }
