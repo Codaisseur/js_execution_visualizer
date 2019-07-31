@@ -33,10 +33,6 @@ export default function HistoryTimeline({
     }
   }, []);
 
-  useEffect(() => {
-    focus(value);
-  }, [focus, value]);
-
   const moveEnd = useCallback(() => (moveData.isMouseDown = false), [moveData]);
 
   document.addEventListener("mouseup", () => moveEnd());
@@ -54,6 +50,7 @@ export default function HistoryTimeline({
       );
 
       onChange(newValue);
+      focus(newValue);
     }
   };
 

@@ -42,7 +42,7 @@ a {
 }
 
 .emptyDivider {
-  margin: 0;
+  margin: 0 $padding;
   height: 0;
   border: none;
   border-top: 2rem solid #eee;
@@ -51,8 +51,12 @@ a {
 .main {
   padding: $padding;
 
+  .loading {
+    color: $blue;
+    font-weight: bold;
+  }
   .error {
-    color: #c00;
+    color: $red;
     font-weight: bold;
   }
 }

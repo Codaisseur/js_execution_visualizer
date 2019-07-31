@@ -4,7 +4,9 @@ import { RuntimeError } from "./errors";
 import { makeInitialContext } from "./context";
 import { evaluate } from "./evaluate";
 
-export default function(code) {
+const sleep = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
+
+export default async function record(code) {
   const ast = parse(code);
   const context = makeInitialContext();
   context.sourceCode = code;
@@ -21,6 +23,9 @@ export default function(code) {
         console.error("too many steps", history);
         return { history, runtimeError: new Error("too many steps!") };
         // throw new Error("too many steps!");
+      }
+      if (i % 100 === 0) {
+        await sleep();
       }
     }
   } catch (e) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef, useMemo, useState } from "react";
 import { stripIndent } from "common-tags";
 import createPersistedState from "use-persisted-state";
 import CodeMirror from "../codemirror/codemirror";
@@ -7,6 +7,7 @@ import Viz from "./Viz";
 import HistoryTimeline from "./HistoryTimeline";
 
 import record from "../lib/record";
+import useAsync from "react-use/lib/useAsync";
 
 const usePersistedCode = createPersistedState("code");
 const usePersistedMaxDetail = createPersistedState("maxdetail");
@@ -44,7 +45,7 @@ const PRESETS = [
     `
   },
   {
-    title: "single map+filter+reduce expression with arrow functions",
+    title: "map+filter+reduce expression",
     code: stripIndent`
       const result = [10, 2, 3, 6]
         .map(n => n - 2)
@@ -70,31 +71,29 @@ export default function App() {
   .map(n => n - 2)
   .filter(n => n > 3)
   .reduce((a, b) => a + b, 0);`);
-  const { error, runtimeError, history } = useMemo(() => {
-    try {
-      return record(code);
-    } catch (error) {
-      console.error(error);
-      return { error };
-    }
-  }, [code]);
+
+  const { loading, value, error } = useAsync(async () => await record(code), [
+    code
+  ]);
 
   const [showBuiltins, setShowBuiltins] = usePersistedShowBuiltins(false);
   const [_stepno, setStepno] = usePersistedStepno(0);
   const [maxDetail, setMaxDetail] = usePersistedMaxDetail(2);
 
-  const visibleHistory =
-    history && history.length > 0
-      ? history.filter(({ detail }) => detail <= maxDetail)
-      : null;
+  const history =
+    value && value.history.length > 0
+      ? value.history.filter(({ detail }) => detail <= maxDetail)
+      : [];
 
-  const stepno = Math.max(
-    0,
-    Math.min(_stepno, (visibleHistory || []).length - 1)
-  );
+  // const history =
+  //   history && history.length > 0
+  //     ? history.filter(({ detail }) => detail <= maxDetail)
+  //     : null;
+
+  const stepno = Math.max(0, Math.min(_stepno, history.length - 1));
 
   // step = { context, node, pre, summary, detail }
-  const step = visibleHistory ? visibleHistory[stepno] : null;
+  const step = history ? history[stepno] : null;
 
   useEffect(() => {
     if (!inst.current.editor) return;
@@ -129,7 +128,14 @@ export default function App() {
           }}
         />
       </div>
-      {(error || !visibleHistory) && <hr className={styles.emptyDivider} />}
+      {(loading || error || history.length === 0) && (
+        <hr className={styles.emptyDivider} />
+      )}
+      {loading && (
+        <div className={styles.main}>
+          <div className={styles.loading}>Loading...</div>
+        </div>
+      )}
       {error && (
         <div className={styles.main}>
           <div className={styles.error}>
@@ -137,13 +143,13 @@ export default function App() {
           </div>
         </div>
       )}
-      {visibleHistory && (
+      {value && history && (
         <div>
           <HistoryTimeline
             value={stepno}
             onChange={setStepno}
-            history={visibleHistory}
-            runtimeError={runtimeError}
+            history={history}
+            runtimeError={value.runtimeError}
           />
           <div className={styles.main}>
             <div>
@@ -181,9 +187,9 @@ export default function App() {
               </label>
             </div>
             {step && <Viz step={step} showBuiltins={showBuiltins} />}
-            {runtimeError && (
+            {value.runtimeError && (
               <div className={styles.error}>
-                <p>Runtime error: {runtimeError.message}</p>
+                <p>Runtime error: {value.runtimeError.message}</p>
               </div>
             )}
           </div>
